@@ -1,8 +1,11 @@
+// server.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes.js';
-import { db, sequelize } from './models/index.js'; // novo
+import bookingRoutes from './routes/booking.routes.js';
+import spaceRoutes from './routes/space.routes.js';
+import db from './models/index.js'; // importa o objeto db que contém sequelize
 
 dotenv.config();
 
@@ -12,22 +15,24 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// Teste de rota
+// Rota simples de teste
 app.get('/', (req, res) => {
   res.send('API de Reservas funcionando! 🚀');
 });
 
-// Rotas
+// Rotas da aplicação
 app.use('/api/auth', authRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/spaces', spaceRoutes);
 
-// Teste e sincronização com o banco
-sequelize.sync({ alter: true }) // Cria/atualiza tabelas automaticamente
+// Sincronização com o banco
+db.sequelize.sync({ alter: true }) // ⚠️ Em produção use `{ force: false }`
   .then(() => {
-    console.log('🟢 Banco sincronizado com Sequelize');
+    console.log("🟢 Banco sincronizado");
     app.listen(port, () => {
       console.log(`✅ Servidor rodando na porta ${port}`);
     });
   })
   .catch((err) => {
-    console.error('🔴 Erro ao conectar ao banco de dados:', err);
+    console.error("🔴 Erro ao conectar ao banco:", err);
   });
