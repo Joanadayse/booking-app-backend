@@ -1,11 +1,10 @@
-// server.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes.js';
 import bookingRoutes from './routes/booking.routes.js';
 import spaceRoutes from './routes/space.routes.js';
-import db from './models/index.js'; // importa o objeto db que contém sequelize
+import db from './models/index.js'; 
 
 dotenv.config();
 

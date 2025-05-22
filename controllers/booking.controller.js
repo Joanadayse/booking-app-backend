@@ -1,27 +1,10 @@
 import db from "../models/index.js";
 
-const { Booking } = db;
+const { Booking, Space, User  } = db;
 
 export const getAllBookings = async (req, res) => {
   try {
-// const bookings = await Booking.findAll({
-//   include: [
-//     { model: User, attributes: ['id', 'name', 'email'] },
-//     { model: Space, attributes: ['id', 'name', 'location'] }
-//   ],
-//   attributes: [
-//     'id', 'title', 'description', 'date', 'start_time', 'end_time', 'turno', 'user_id', 'space_id', 'createdAt', 'updatedAt'
-//   ],
-//   order: [['date', 'ASC'], ['start_time', 'ASC']]
-// });
 
-// const bookings = await Booking.findAll({
-//   include: [
-//     { model: User, attributes: ['id', 'name', 'email'] },
-//     { model: Space, attributes: ['id', 'name', 'location'] }
-//   ],
-//   order: [['date', 'ASC'], ['start_time', 'ASC']]
-// });
 
 const bookings = await Booking.findAll({
   include: [
@@ -106,6 +89,31 @@ export const deleteBooking = async (req, res) => {
   } catch (error) {
     console.error("Erro ao deletar reserva:", error);
     res.status(500).json({ error: "Erro ao deletar reserva." });
+  }
+};
+
+export const getBookingsByLocation = async (req, res) => {
+  try {
+    const { location_id } = req.params;
+
+    const bookings = await Booking.findAll({
+      include: [
+        {
+          model: Space,
+          attributes: ["name", "location"],
+          where: { location: location_id === "1" ? "Caldeira" : "EQTLAB" }
+        },
+        {
+          model: User,
+          attributes: ["name"]
+        }
+      ]
+    });
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error("❌ Erro ao buscar reservas:", error);
+    res.status(500).json({ error: "Erro ao buscar reservas." });
   }
 };
 

@@ -1,12 +1,13 @@
-// migrations/20250521182702-add-turno-to-bookings.js
-export async function up(queryInterface, Sequelize) {
-  await queryInterface.addColumn('bookings', 'turno', {
-    type: Sequelize.STRING,
-    allowNull: false,
-    defaultValue: 'manhã' // ou outro valor padrão se preferir
-  });
-}
+module.exports = {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.addColumn("Spaces", "created_at", {
+      type: Sequelize.DATE,
+      allowNull: false,
+      defaultValue: Sequelize.literal("NOW()") // ✅ Define um valor padrão
+    });
+  },
 
-export async function down(queryInterface, Sequelize) {
-  await queryInterface.removeColumn('bookings', 'turno');
-}
+  async down(queryInterface, Sequelize) {
+    await queryInterface.removeColumn("Spaces", "created_at");
+  }
+};
