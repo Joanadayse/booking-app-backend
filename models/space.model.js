@@ -10,7 +10,7 @@ export default (sequelize, DataTypes) => {
   });
 
   Space.associate = (models) => {
-    Space.hasMany(models.Booking, { foreignKey: "space_id" }); // ✅
+    Space.hasMany(models.Booking, { foreignKey: "space_id" });
   };
 
   return Space;
