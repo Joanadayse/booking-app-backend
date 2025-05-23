@@ -87,7 +87,7 @@ export const deleteBooking = async (req, res) => {
     await booking.destroy();
     res.json({ message: "Reserva deletada com sucesso!" });
   } catch (error) {
-    console.error("Erro ao deletar reserva:", error);
+    console.error("❌ Erro ao deletar reserva:", error);
     res.status(500).json({ error: "Erro ao deletar reserva." });
   }
 };
