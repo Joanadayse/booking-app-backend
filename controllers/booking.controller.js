@@ -166,3 +166,32 @@ export const updateBooking = async (req, res) => {
   }
 };
 
+export const getBookingById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const booking = await Booking.findByPk(id, {
+      include: [
+        {
+          model: Space,
+          attributes: ['name', 'location']
+        },
+        {
+          model: User,
+          attributes: ['name', 'email']
+        }
+      ]
+    });
+
+    if (!booking) {
+      return res.status(404).json({ error: "Reserva não encontrada." });
+    }
+
+    res.json(booking);
+  } catch (error) {
+    console.error("Erro ao buscar reserva por ID:", error);
+    res.status(500).json({ error: "Erro ao buscar reserva por ID." });
+  }
+};
+
+
