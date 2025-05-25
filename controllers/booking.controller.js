@@ -117,3 +117,52 @@ export const getBookingsByLocation = async (req, res) => {
   }
 };
 
+export const updateBooking = async (req, res) => {
+  console.log("UpdateBooking chamada com id:", req.params.id);
+  try {
+    const { id } = req.params;
+    const { title, description, date, turno, user_id, space_id } = req.body;
+
+    // Verifica se a reserva existe
+    const booking = await Booking.findByPk(id);
+    if (!booking) {
+      return res.status(404).json({ error: "Reserva não encontrada." });
+    }
+
+    // Validação básica dos campos obrigatórios
+    if (!title || !date || !turno || !user_id || !space_id) {
+      return res.status(400).json({ error: "Todos os campos são obrigatórios." });
+    }
+
+    // Definir horários conforme turno
+    const turnos = {
+      manhã: { start_time: "08:00", end_time: "12:00" },
+      tarde: { start_time: "13:00", end_time: "17:00" },
+      integral: { start_time: "08:00", end_time: "17:00" }
+    };
+
+    if (!turnos[turno]) {
+      return res.status(400).json({ error: "Turno inválido!" });
+    }
+
+    const { start_time, end_time } = turnos[turno];
+
+    // Atualiza os campos da reserva
+    booking.title = title;
+    booking.description = description;
+    booking.date = date;
+    booking.turno = turno;
+    booking.start_time = start_time;
+    booking.end_time = end_time;
+    booking.user_id = user_id;
+    booking.space_id = space_id;
+
+    await booking.save();
+
+    res.json(booking);
+  } catch (error) {
+    console.error("Erro ao atualizar reserva:", error);
+    res.status(500).json({ error: "Erro ao atualizar reserva." });
+  }
+};
+
