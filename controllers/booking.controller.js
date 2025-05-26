@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import db from "../models/index.js";
 
 const { Booking, Space, User  } = db;
@@ -119,6 +120,8 @@ export const getBookingsByLocation = async (req, res) => {
 
 export const updateBooking = async (req, res) => {
   console.log("UpdateBooking chamada com id:", req.params.id);
+   console.log("UpdateBooking chamada com id:", req.params.id);
+  console.log("Dados recebidos no update:", req.body);
   try {
     const { id } = req.params;
     const { title, description, date, turno, user_id, space_id } = req.body;
@@ -169,17 +172,16 @@ export const updateBooking = async (req, res) => {
 export const getBookingById = async (req, res) => {
   try {
     const { id } = req.params;
+    const bookingId = Number(id);
 
-    const booking = await Booking.findByPk(id, {
+    if (isNaN(bookingId)) {
+      return res.status(400).json({ error: "ID inválido." });
+    }
+
+    const booking = await Booking.findByPk(bookingId, {
       include: [
-        {
-          model: Space,
-          attributes: ['name', 'location']
-        },
-        {
-          model: User,
-          attributes: ['name', 'email']
-        }
+        { model: Space, attributes: ['name', 'location'] },
+        { model: User, attributes: ['name', 'email'] }
       ]
     });
 
@@ -193,5 +195,56 @@ export const getBookingById = async (req, res) => {
     res.status(500).json({ error: "Erro ao buscar reserva por ID." });
   }
 };
+
+
+
+export const getFilteredBookings = async (req, res) => { 
+  try {
+    const { startDate, endDate, turno, spaceId, spaceName } = req.query;
+
+    const where = {};
+
+    if (startDate && endDate) {
+      where.date = {
+        [Op.between]: [startDate, endDate],
+      };
+    }
+
+    if (turno) {
+      where.turno = turno;
+    }
+
+    if (spaceId) {
+      where.space_id = Number(spaceId);
+    }
+
+    const includeSpace = {
+      model: Space,
+      attributes: ["name", "location"],
+    };
+
+    if (spaceName) {
+      includeSpace.where = { name: spaceName };
+    }
+
+    const bookings = await Booking.findAll({
+      where,
+      include: [
+        includeSpace,
+        {
+          model: User,
+          attributes: ["name"],
+        },
+      ],
+      order: [["date", "ASC"]],
+    });
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error("Erro ao buscar reservas com filtro:", error);
+    res.status(500).json({ error: "Erro ao buscar reservas." });
+  }
+};
+
 
 
