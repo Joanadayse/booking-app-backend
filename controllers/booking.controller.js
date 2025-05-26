@@ -306,6 +306,7 @@ export const getStats = async (req, res) => {
       include: [{ model: Space, attributes: ["id", "name"] }]
     });
 
+
     const totalReservasPorTurno = await Booking.findAll({
       attributes: [
         "turno",
@@ -329,6 +330,51 @@ export const getStats = async (req, res) => {
     res.status(500).json({ error: "Erro ao buscar estatísticas." });
   }
 };
+
+
+export const getStatsByLocation = async (req, res) => {
+  try {
+    const { location } = req.params; // 🔹 Captura o parâmetro da URL
+
+    const totalReservasPorSala = await Booking.findAll({
+      attributes: [
+        "space_id",
+        [db.sequelize.fn("COUNT", db.sequelize.col("space_id")), "total"]
+      ],
+      group: ["space_id", "Space.id", "Space.name"],
+      include: [
+        { model: Space, attributes: ["id", "name"], where: { location } } // 🔹 Filtra pelo location
+      ]
+    });
+
+    const totalReservasPorTurno = await Booking.findAll({
+      attributes: ["turno", [db.sequelize.fn("COUNT", db.sequelize.col("turno")), "total"]],
+      group: ["turno"],
+      include: [
+        { model: Space, attributes: [], where: { location } } // 🔹 Filtra pelo location
+      ]
+    });
+
+    const totalReservasPorMes = await Booking.findAll({
+      attributes: [
+        [db.sequelize.fn("DATE_TRUNC", "month", db.sequelize.col("date")), "mes"],
+        [db.sequelize.fn("COUNT", db.sequelize.col("id")), "total"]
+      ],
+      group: ["mes"],
+      order: [[db.sequelize.fn("DATE_TRUNC", "month", db.sequelize.col("date")), "ASC"]],
+      include: [
+        { model: Space, attributes: [], where: { location } } // 🔹 Filtra pelo location
+      ]
+    });
+
+    res.json({ totalReservasPorSala, totalReservasPorTurno, totalReservasPorMes });
+  } catch (error) {
+    console.error("❌ Erro ao buscar estatísticas:", error);
+    res.status(500).json({ error: "Erro ao buscar estatísticas." });
+  }
+};
+
+
 
 
 

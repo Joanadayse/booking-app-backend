@@ -7,14 +7,18 @@ import {
   updateBooking,
   getBookingById,
   getFilteredBookings,
-  getStats
+  getStats,
+  getStatsByLocation
 } from "../controllers/booking.controller.js";
 
 const router = express.Router();
 
 
+
 router.get("/", getAllBookings);
 router.get("/stats", getStats);
+router.get("/stats/:location", getStatsByLocation);
+
 
 // ROTAS ESPECÍFICAS PRIMEIRO
 router.get('/filtro', getFilteredBookings);
@@ -25,6 +29,7 @@ router.get('/:id', getBookingById);
 router.post("/", createBooking);
 router.delete("/:id", deleteBooking);
 router.put("/:id", updateBooking);
+
 
 
 
