@@ -1,5 +1,10 @@
 import { Op } from "sequelize";
 import db from "../models/index.js";
+import { Sequelize } from "sequelize";
+
+
+
+
 
 const { Booking, Space, User  } = db;
 
@@ -224,8 +229,12 @@ export const getFilteredBookings = async (req, res) => {
     };
 
     if (spaceName) {
-      includeSpace.where = { name: spaceName };
+  includeSpace.where = {
+    name: {
+      [Op.iLike]: `%${spaceName}%` // para buscar nomes parcialmente, insensível a maiúsculas/minúsculas
     }
+  };
+}
 
     const bookings = await Booking.findAll({
       where,
@@ -243,6 +252,29 @@ export const getFilteredBookings = async (req, res) => {
   } catch (error) {
     console.error("Erro ao buscar reservas com filtro:", error);
     res.status(500).json({ error: "Erro ao buscar reservas." });
+  }
+};
+
+export const getStats = async (req, res) => {
+  try {
+    const totalReservasPorSala = await Booking.findAll({
+      attributes: [
+        "space_id",
+        [db.sequelize.fn("COUNT", db.sequelize.col("space_id")), "total"]
+      ],
+      group: ["space_id", "Space.id", "Space.name"], // ✅ Adiciona "Space.id" e "Space.name" ao GROUP BY
+      include: [
+        {
+          model: Space,
+          attributes: ["id", "name"] // ✅ Mantém apenas atributos usados na cláusula GROUP BY
+        }
+      ]
+    });
+
+    res.json({ totalReservasPorSala });
+  } catch (error) {
+    console.error("❌ Erro ao buscar estatísticas:", error);
+    res.status(500).json({ error: "Erro ao buscar estatísticas." });
   }
 };
 
