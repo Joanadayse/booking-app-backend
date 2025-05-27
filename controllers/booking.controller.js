@@ -10,25 +10,22 @@ const { Booking, Space, User  } = db;
 
 export const getAllBookings = async (req, res) => {
   try {
-
-
-const bookings = await Booking.findAll({
-  include: [
-    {
-      model: Space,
-      attributes: ['name', 'location']
-    },
-    {
-      model: User,
-      attributes: ['name', 'email']
-    }
-  ]
-});
-
-
-console.log(JSON.stringify(bookings, null, 2));
-
-
+    const bookings = await Booking.findAll({
+      include: [
+        {
+          model: Space,
+          attributes: ['name', 'location']
+        },
+        {
+          model: User,
+          attributes: ['name', 'email']
+        }
+      ],
+      order: [
+        ['date', 'ASC'],
+        ['start_time', 'ASC']
+      ]
+    });
 
     res.json(bookings);
   } catch (error) {
@@ -36,6 +33,7 @@ console.log(JSON.stringify(bookings, null, 2));
     res.status(500).json({ error: "Erro ao buscar reservas" });
   }
 };
+
 
 
 export const createBooking = async (req, res) => {
