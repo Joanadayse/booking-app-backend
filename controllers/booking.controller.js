@@ -304,14 +304,6 @@ const totalReservasPorMes = await Booking.findAll({
   include: [{ model: Space, attributes: [], where: { location } }] // 🔹 Filtrando pelo Location
 });
 
-    // const totalReservasPorMes = await Booking.findAll({
-    //   attributes: [
-    //     [db.sequelize.fn("DATE_TRUNC", "month", db.sequelize.col("date")), "mes"],
-    //     [db.sequelize.fn("COUNT", db.sequelize.col("id")), "total"]
-    //   ],
-    //   group: ["mes"],
-    //   order: [[db.sequelize.fn("DATE_TRUNC", "month", db.sequelize.col("date")), "ASC"]]
-    // });
 
     res.json({ totalReservasPorSala, totalReservasPorTurno, totalReservasPorMes });
   } catch (error) {
@@ -342,17 +334,6 @@ const totalReservasPorSala = await Booking.findAll({
       ]
     });
 
-    // const totalReservasPorMes = await Booking.findAll({
-    //   attributes: [
-    //     [db.sequelize.fn("DATE_TRUNC", "month", db.sequelize.col("date")), "mes"],
-    //     [db.sequelize.fn("COUNT", db.sequelize.col("id")), "total"]
-    //   ],
-    //   group: ["mes"],
-    //   order: [[db.sequelize.fn("DATE_TRUNC", "month", db.sequelize.col("date")), "ASC"]],
-    //   include: [
-    //     { model: Space, attributes: [], where: { location } } // 🔹 Filtra pelo location
-    //   ]
-    // });
 
     const totalReservasPorMes = await Booking.findAll({
   attributes: [
