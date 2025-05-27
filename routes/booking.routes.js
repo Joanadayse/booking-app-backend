@@ -17,7 +17,7 @@ const router = express.Router();
 
 router.get("/", getAllBookings);
 router.get("/stats", getStats);
-router.get("/stats/:location", getStatsByLocation);
+router.get("/stats/location/:location", getStatsByLocation);
 
 
 // ROTAS ESPECÍFICAS PRIMEIRO
