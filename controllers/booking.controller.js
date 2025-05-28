@@ -96,8 +96,9 @@ const booking = await Booking.create({
 
     res.status(201).json(booking);
   } catch (error) {
-    console.error("Erro ao criar reserva:", error);
-    res.status(500).json({ error: "Erro ao criar reserva." });
+     console.error("❌ Erro ao criar reserva:", error.message);
+  console.error("📄 Stack do erro:", error.stack);
+  res.status(500).json({ error: "Erro ao criar reserva." });
   }
 };
 

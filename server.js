@@ -6,7 +6,9 @@ import bookingRoutes from './routes/booking.routes.js';
 import spaceRoutes from './routes/space.routes.js';
 import db from './models/index.js'; 
 
-dotenv.config();
+dotenv.config({
+  path: process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local',
+});
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -25,7 +27,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/spaces', spaceRoutes);
 
 // Sincronização com o banco
-db.sequelize.sync({ force: true }) // ⚠️ Em produção use `{ force: false }`
+db.sequelize.sync() // ⚠️ Em produção use `{ force: false }`
   .then(() => {
     console.log("🟢 Banco sincronizado");
     app.listen(port, () => {

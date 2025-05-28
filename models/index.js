@@ -10,15 +10,13 @@ dotenv.config();
 
 // Conecta usando a DATABASE_URL
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: "postgres",
-  protocol: "postgres",
-  logging: false,
+  dialect: 'postgres',
   dialectOptions: {
-    ssl: {
+    ssl: process.env.NODE_ENV === 'production' ? {
       require: true,
-      rejectUnauthorized: false, // necessário em alguns ambientes de deploy
-    },
-  },
+      rejectUnauthorized: false
+    } : false
+  }
 });
 
 // Inicializa o objeto db
