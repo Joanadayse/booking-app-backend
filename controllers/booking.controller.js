@@ -58,6 +58,10 @@ export const createBooking = async (req, res) => {
     }
 
     const { start_time, end_time } = turnos[turno];
+    if (isNaN(space_id) || isNaN(user_id)) {
+  return res.status(400).json({ error: "IDs devem ser numéricos." });
+}
+
 
     // Criar a reserva com Sequelize, incluindo o campo turno
     const booking = await Booking.create({
@@ -100,26 +104,40 @@ export const getBookingsByLocation = async (req, res) => {
   try {
     const { location_id } = req.params;
 
+    // Mapear o location_id para o nome da localização
+    const locationMap = {
+      "1": "Caldeira",
+      "2": "EQTLab"
+    };
+
+    const locationName = locationMap[location_id];
+
+    if (!locationName) {
+      return res.status(400).json({ error: "Localização inválida" });
+    }
+
     const bookings = await Booking.findAll({
       include: [
         {
           model: Space,
           attributes: ["name", "location"],
-          where: { location: location_id === "1" ? "Caldeira" : "EQTLAB" }
+          where: { location: locationName }  // Filtra pelo nome da localização
         },
         {
           model: User,
           attributes: ["name"]
         }
-      ]
+      ],
+      order: [['date', 'ASC'], ['start_time', 'ASC']]
     });
 
-    res.status(200).json(bookings);
+    return res.json(bookings);
   } catch (error) {
-    console.error("❌ Erro ao buscar reservas:", error);
-    res.status(500).json({ error: "Erro ao buscar reservas." });
+    console.error(error);
+    return res.status(500).json({ error: "Erro ao buscar reservas por localização" });
   }
 };
+
 
 export const updateBooking = async (req, res) => {
   console.log("UpdateBooking chamada com id:", req.params.id);
