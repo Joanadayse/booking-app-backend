@@ -14,6 +14,13 @@ API para gerenciamento de reservas de salas compartilhadas.
 
 ---
 
+🌍 Deploy
+🔹 Backend rodando em:
+```
+https://booking-app-backend-production-a215.up.railway.app
+```
+
+
 ## ⚙️ Instalação
 
 1. Clone o projeto:
