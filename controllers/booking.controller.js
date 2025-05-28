@@ -46,6 +46,25 @@ export const createBooking = async (req, res) => {
       return res.status(400).json({ error: "Todos os campos são obrigatórios." });
     }
 
+    if (isNaN(space_id) || isNaN(user_id)) {
+      return res.status(400).json({ error: "IDs devem ser numéricos." });
+    }
+
+    // Verificar se já existe uma reserva no mesmo turno, data e espaço
+    const reservaExistente = await Booking.findOne({
+      where: {
+        date,
+        turno,
+        space_id
+      }
+    });
+
+    if (reservaExistente) {
+      return res.status(409).json({
+        error: "Já existe uma reserva para esse espaço, data e turno."
+      });
+    }
+
     // Definir horários conforme turno
     const turnos = {
       manhã: { start_time: "08:00", end_time: "12:00" },
@@ -58,19 +77,15 @@ export const createBooking = async (req, res) => {
     }
 
     const { start_time, end_time } = turnos[turno];
-    if (isNaN(space_id) || isNaN(user_id)) {
-  return res.status(400).json({ error: "IDs devem ser numéricos." });
-}
 
-
-    // Criar a reserva com Sequelize, incluindo o campo turno
+    // Criar a reserva
     const booking = await Booking.create({
       title,
       description,
       date,
       start_time,
       end_time,
-      turno,   // <=== IMPORTANTE
+      turno,
       user_id,
       space_id
     });
