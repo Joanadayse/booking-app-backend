@@ -1,5 +1,3 @@
-
-
 export const login = (req, res) => {
   const { name, email } = req.body;
 

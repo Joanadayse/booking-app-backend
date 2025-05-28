@@ -4,8 +4,6 @@ import { Sequelize } from "sequelize";
 
 
 
-
-
 const { Booking, Space, User  } = db;
 
 export const getAllBookings = async (req, res) => {
@@ -127,7 +125,7 @@ export const getBookingsByLocation = async (req, res) => {
     // Mapear o location_id para o nome da localização
     const locationMap = {
       "1": "Caldeira",
-      "2": "EQTLab"
+      "2": "EQTLAB"
     };
 
     const locationName = locationMap[location_id];
@@ -374,6 +372,47 @@ const totalReservasPorSala = await Booking.findAll({
   }
 };
 
+export const getAvailabilityByLocationAndDate = async (req, res) => {
+  try {
+    const { location, date, turno } = req.query;
+
+    if (!location || !date || !turno) {
+      return res.status(400).json({ error: "Parâmetros 'location', 'date' e 'turno' são obrigatórios." });
+    }
+
+    // Buscar todos os espaços da localização informada
+    const spaces = await Space.findAll({
+      where: { location },
+      attributes: ['id', 'name']
+    });
+
+    if (spaces.length === 0) {
+      return res.status(404).json({ error: "Nenhum espaço encontrado para a localização informada." });
+    }
+
+    const spaceIds = spaces.map(space => space.id);
+
+    // Buscar reservas existentes nessa data, turno e nos espaços da localização
+    const reservas = await Booking.findAll({
+      where: {
+        date: date.trim(),
+        turno: turno.trim().toLowerCase(),
+        space_id: spaceIds
+      },
+      attributes: ['space_id']
+    });
+
+    const spaceIdsReservados = reservas.map(r => r.space_id);
+
+    // Filtrar os espaços disponíveis (não reservados)
+    const availableSpaces = spaces.filter(space => !spaceIdsReservados.includes(space.id));
+
+    res.json({ availableSpaces });
+  } catch (error) {
+    console.error("Erro ao verificar disponibilidade:", error);
+    res.status(500).json({ error: "Erro ao verificar disponibilidade." });
+  }
+};
 
 
 

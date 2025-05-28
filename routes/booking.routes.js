@@ -8,16 +8,18 @@ import {
   getBookingById,
   getFilteredBookings,
   getStats,
-  getStatsByLocation
+  getStatsByLocation,
+  getAvailabilityByLocationAndDate
 } from "../controllers/booking.controller.js";
 
 const router = express.Router();
 
 
-
 router.get("/", getAllBookings);
 router.get("/stats", getStats);
 router.get("/stats/location/:location", getStatsByLocation);
+router.get("/availability", getAvailabilityByLocationAndDate);
+
 
 
 // ROTAS ESPECÍFICAS PRIMEIRO
