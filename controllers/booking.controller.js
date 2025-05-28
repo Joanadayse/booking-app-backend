@@ -49,21 +49,25 @@ export const createBooking = async (req, res) => {
     if (isNaN(space_id) || isNaN(user_id)) {
       return res.status(400).json({ error: "IDs devem ser numéricos." });
     }
+console.log("🔍 Verificando reserva existente para:", { date, turno, space_id });
 
     // Verificar se já existe uma reserva no mesmo turno, data e espaço
-    const reservaExistente = await Booking.findOne({
-      where: {
-        date,
-        turno,
-        space_id
-      }
-    });
+const reservaExistente = await Booking.findOne({
+  where: {
+    date: date.trim(), // sempre string
+    turno: turno.trim().toLowerCase(), // normalizado
+    space_id: Number(space_id) // garantir número
+  }
+});
 
-    if (reservaExistente) {
-      return res.status(409).json({
-        error: "Já existe uma reserva para esse espaço, data e turno."
-      });
-    }
+
+ if (reservaExistente) {
+  console.log("⚠️ Reserva já existe!", reservaExistente.toJSON());
+  return res.status(409).json({
+    error: "Já existe uma reserva para esse espaço, data e turno."
+  });
+}
+
 
     // Definir horários conforme turno
     const turnos = {
@@ -76,19 +80,19 @@ export const createBooking = async (req, res) => {
       return res.status(400).json({ error: "Turno inválido!" });
     }
 
-    const { start_time, end_time } = turnos[turno];
+const { start_time, end_time } = turnos[turno.trim().toLowerCase()];
 
-    // Criar a reserva
-    const booking = await Booking.create({
-      title,
-      description,
-      date,
-      start_time,
-      end_time,
-      turno,
-      user_id,
-      space_id
-    });
+const booking = await Booking.create({
+  title,
+  description,
+  date: date.trim(),
+  start_time,
+  end_time,
+  turno: turno.trim().toLowerCase(),
+  user_id: Number(user_id),
+  space_id: Number(space_id)
+});
+
 
     res.status(201).json(booking);
   } catch (error) {
