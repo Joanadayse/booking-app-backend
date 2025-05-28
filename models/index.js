@@ -1,22 +1,25 @@
 // models/index.js
 import { Sequelize, DataTypes } from "sequelize";
-import { readFileSync } from "fs";
+import dotenv from "dotenv";
 
-// Lê configurações do config.json
-const rawConfig = readFileSync(new URL("../config/config.json", import.meta.url));
-const parsedConfig = JSON.parse(rawConfig);
-const dbConfig = parsedConfig.development;
-
-// Conecta com o banco
-const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, {
-  host: dbConfig.host,
-  dialect: dbConfig.dialect
-});
-
-// Importa modelos
 import userModel from "./user.model.js";
 import spaceModel from "./space.model.js";
 import bookingModel from "./booking.model.js";
+
+dotenv.config();
+
+// Conecta usando a DATABASE_URL
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: "postgres",
+  protocol: "postgres",
+  logging: false,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false, // necessário em alguns ambientes de deploy
+    },
+  },
+});
 
 // Inicializa o objeto db
 const db = {};
