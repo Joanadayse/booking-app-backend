@@ -25,7 +25,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/spaces', spaceRoutes);
 
 // Sincronização com o banco
-db.sequelize.sync({ alter: true }) // ⚠️ Em produção use `{ force: false }`
+db.sequelize.sync({ force: true }) // ⚠️ Em produção use `{ force: false }`
   .then(() => {
     console.log("🟢 Banco sincronizado");
     app.listen(port, () => {

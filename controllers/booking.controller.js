@@ -254,24 +254,6 @@ export const getFilteredBookings = async (req, res) => {
 };
 
 
-
-const totalReservasPorTurno = await Booking.findAll({
-  attributes: [
-    "turno",
-    [db.sequelize.fn("COUNT", db.sequelize.col("turno")), "total"]
-  ],
-  group: ["turno"]
-});
-
-const totalReservasPorMes = await Booking.findAll({
-  attributes: [
-    [db.sequelize.fn("DATE_TRUNC", "month", db.sequelize.col("date")), "mes"],
-    [db.sequelize.fn("COUNT", db.sequelize.col("id")), "total"]
-  ],
-  group: ["mes"],
-  order: [[db.sequelize.fn("DATE_TRUNC", "month", db.sequelize.col("date")), "ASC"]]
-});
-
 export const getStats = async (req, res) => {
   try {
     const totalReservasPorSala = await Booking.findAll({
@@ -316,10 +298,14 @@ export const getStatsByLocation = async (req, res) => {
     const { location } = req.params; // 🔹 Captura o parâmetro da URL
 
 const totalReservasPorSala = await Booking.findAll({
+  // attributes: [
+  //   "Booking.space_id",
+  //   [db.sequelize.fn("COUNT", db.sequelize.col("Booking.space_id")), "total"]
+  // ],
   attributes: [
-    "Booking.space_id",
-    [db.sequelize.fn("COUNT", db.sequelize.col("Booking.space_id")), "total"]
-  ],
+  "space_id",
+  [db.sequelize.fn("COUNT", db.sequelize.col("space_id")), "total"]
+],
   group: ["Booking.space_id", "Space.id", "Space.name"], // 🔹 Especificando Booking corretamente
   include: [{ model: Space, attributes: ["id", "name"], where: { location } }]
 });
