@@ -37,3 +37,21 @@ export const login = async (req, res) => {
     return res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
+
+
+export const getUser = async (req, res) => {
+  try {
+    const user = await userModel.findByPk(req.user.id, {
+      attributes: ['id', 'name', 'email']
+    });
+
+    if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
+
+    return res.status(200).json(user); // Repare que não precisa `{ user }`, pois já é só isso
+
+  } catch (error) {
+    console.error("Erro ao obter usuário:", error);
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
+};
+

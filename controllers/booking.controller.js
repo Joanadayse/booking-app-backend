@@ -57,16 +57,17 @@ const normalizeTurno = (turno) => turno.toLowerCase().normalize("NFD").replace(/
 
 const haConflitoDeTurno = (turnoNovo, turnoExistente) => {
   const turnosEquivalentes = {
-    manha: ["manha", "integral"],
-    tarde: ["tarde", "integral"],
-    integral: ["manha", "tarde", "integral"]
+    manha: ["manha", "integral"], // 🔹 "manha" não deve bloquear "tarde"
+    tarde: ["tarde", "integral"], // 🔹 "tarde" não deve bloquear "manha"
+    integral: ["manha", "tarde", "integral"] // 🔹 "integral" bloqueia tudo
   };
 
   const novo = normalizeTurno(turnoNovo);
   const existente = normalizeTurno(turnoExistente);
 
-  // Conflito se o turno existente está na lista de turnos equivalentes ao novo
-  return turnosEquivalentes[novo]?.includes(existente);
+  console.log(`🆚 Comparação de conflito no back-end: novo = ${novo}, existente = ${existente}`);
+
+  return turnosEquivalentes[novo]?.includes(existente) && novo !== existente;
 };
 
 
