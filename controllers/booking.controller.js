@@ -47,58 +47,88 @@ export const createBooking = async (req, res) => {
     if (isNaN(space_id) || isNaN(user_id)) {
       return res.status(400).json({ error: "IDs devem ser numéricos." });
     }
-console.log("🔍 Verificando reserva existente para:", { date, turno, space_id });
 
-    // Verificar se já existe uma reserva no mesmo turno, data e espaço
-const reservaExistente = await Booking.findOne({
+    console.log("🔍 Verificando reservas existentes para:", { date, space_id });
+
+    // Função para verificar conflito de turno igual ao frontend
+
+
+const normalizeTurno = (turno) => turno.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+const haConflitoDeTurno = (turnoNovo, turnoExistente) => {
+  const turnosEquivalentes = {
+    manha: ["manha", "integral"],
+    tarde: ["tarde", "integral"],
+    integral: ["manha", "tarde", "integral"]
+  };
+
+  const novo = normalizeTurno(turnoNovo);
+  const existente = normalizeTurno(turnoExistente);
+
+  // Conflito se o turno existente está na lista de turnos equivalentes ao novo
+  return turnosEquivalentes[novo]?.includes(existente);
+};
+
+
+// Buscar todas as reservas para mesma data e espaço
+const reservasExistentes = await Booking.findAll({
   where: {
-    date: date.trim(), // sempre string
-    turno: turno.trim().toLowerCase(), // normalizado
-    space_id: Number(space_id) // garantir número
+    date: date.trim(),
+    space_id: Number(space_id)
   }
 });
 
+// Verificar se algum turno conflita
+const existeConflito = reservasExistentes.some(reserva =>
+  haConflitoDeTurno(turno, reserva.turno)
+);
 
- if (reservaExistente) {
-  console.log("⚠️ Reserva já existe!", reservaExistente.toJSON());
+if (existeConflito) {
+  console.log("⚠️ Conflito de reserva detectado.");
   return res.status(409).json({
-    error: "Já existe uma reserva para esse espaço, data e turno."
+    error: "Já existe uma reserva para esse espaço, data e turno conflitante."
   });
 }
-
-
     // Definir horários conforme turno
-    const turnos = {
-      manhã: { start_time: "08:00", end_time: "12:00" },
-      tarde: { start_time: "13:00", end_time: "17:00" },
-      integral: { start_time: "08:00", end_time: "17:00" }
-    };
+const turnos = {
+  manha: { start_time: "08:00", end_time: "12:00" },
+  tarde: { start_time: "13:00", end_time: "17:00" },
+  integral: { start_time: "08:00", end_time: "17:00" }
+};
 
-    if (!turnos[turno]) {
-      return res.status(400).json({ error: "Turno inválido!" });
-    }
 
-const { start_time, end_time } = turnos[turno.trim().toLowerCase()];
 
-const booking = await Booking.create({
-  title,
-  description,
-  date: date.trim(),
-  start_time,
-  end_time,
-  turno: turno.trim().toLowerCase(),
-  user_id: Number(user_id),
-  space_id: Number(space_id)
-});
+const turnoNormalizado = normalizeTurno(turno);
 
+if (!turnos[turnoNormalizado]) {
+  return res.status(400).json({ error: "Turno inválido!" });
+}
+
+const { start_time, end_time } = turnos[turnoNormalizado];
+
+
+
+    // Criar reserva
+    const booking = await Booking.create({
+      title,
+      description,
+      date: date.trim(),
+      start_time,
+      end_time,
+      turno: turnoNormalizado,
+      user_id: Number(user_id),
+      space_id: Number(space_id)
+    });
 
     res.status(201).json(booking);
+
   } catch (error) {
-     console.error("❌ Erro ao criar reserva:", error.message);
-  console.error("📄 Stack do erro:", error.stack);
-  res.status(500).json({ error: "Erro ao criar reserva." });
+    console.error("❌ Erro ao criar reserva:", error.message);
+    console.error("📄 Stack do erro:", error.stack);
+    res.status(500).json({ error: "Erro ao criar reserva." });
   }
 };
+
 
 
 export const deleteBooking = async (req, res) => {
@@ -380,7 +410,8 @@ export const getAvailabilityByLocationAndDate = async (req, res) => {
       return res.status(400).json({ error: "Parâmetros 'location', 'date' e 'turno' são obrigatórios." });
     }
 
-    // Buscar todos os espaços da localização informada
+    const turnoBusca = turno.trim().toLowerCase();
+
     const spaces = await Space.findAll({
       where: { location },
       attributes: ['id', 'name']
@@ -392,27 +423,42 @@ export const getAvailabilityByLocationAndDate = async (req, res) => {
 
     const spaceIds = spaces.map(space => space.id);
 
-    // Buscar reservas existentes nessa data, turno e nos espaços da localização
+    // Buscar todas as reservas para a data e localização
     const reservas = await Booking.findAll({
       where: {
         date: date.trim(),
-        turno: turno.trim().toLowerCase(),
         space_id: spaceIds
       },
-      attributes: ['space_id']
+      attributes: ['space_id', 'turno']
     });
 
-    const spaceIdsReservados = reservas.map(r => r.space_id);
+    // Verificar se há conflito de turnos
+    const spaceIdsIndisponiveis = reservas
+      .filter(reserva => {
+        const turnoReserva = reserva.turno.toLowerCase();
 
-    // Filtrar os espaços disponíveis (não reservados)
-    const availableSpaces = spaces.filter(space => !spaceIdsReservados.includes(space.id));
+        return (
+          // Se a reserva for "integral", ela bloqueia qualquer turno
+          turnoReserva === "integral" ||
+          // Se a busca for por "integral", qualquer reserva existente já bloqueia
+          turnoBusca === "integral" ||
+          // Se forem turnos iguais, também bloqueia
+          turnoReserva === turnoBusca
+        );
+      })
+      .map(reserva => reserva.space_id);
+
+    // Filtrar os espaços que ainda estão disponíveis
+    const availableSpaces = spaces.filter(space => !spaceIdsIndisponiveis.includes(space.id));
 
     res.json({ availableSpaces });
+
   } catch (error) {
     console.error("Erro ao verificar disponibilidade:", error);
     res.status(500).json({ error: "Erro ao verificar disponibilidade." });
   }
 };
+
 
 
 

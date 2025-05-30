@@ -11,34 +11,23 @@ import {
   getStatsByLocation,
   getAvailabilityByLocationAndDate
 } from "../controllers/booking.controller.js";
+import { authenticateToken } from "../middlewares/authMiddleware.js";
+
 
 const router = express.Router();
 
+// 🔒 Protegendo rotas com JWT
+router.get("/", authenticateToken, getAllBookings);
+router.get("/stats", authenticateToken, getStats);
+router.get("/stats/location/:location", authenticateToken, getStatsByLocation);
+router.get("/availability", authenticateToken, getAvailabilityByLocationAndDate);
 
-router.get("/", getAllBookings);
-router.get("/stats", getStats);
-router.get("/stats/location/:location", getStatsByLocation);
-router.get("/availability", getAvailabilityByLocationAndDate);
+router.get('/filtro', authenticateToken, getFilteredBookings);
+router.get("/location/:location_id", authenticateToken, getBookingsByLocation);
 
-
-
-// ROTAS ESPECÍFICAS PRIMEIRO
-router.get('/filtro', getFilteredBookings);
-router.get("/location/:location_id", getBookingsByLocation);
-
-// ROTAS COM PARÂMETROS DEPOIS
-router.get('/:id', getBookingById);
-router.post("/", createBooking);
-router.delete("/:id", deleteBooking);
-router.put("/:id", updateBooking);
-
-
-
-
-
-
-
-
+router.get('/:id', authenticateToken, getBookingById);
+router.post("/", authenticateToken, createBooking);
+router.delete("/:id", authenticateToken, deleteBooking);
+router.put("/:id", authenticateToken, updateBooking);
 
 export default router;
-

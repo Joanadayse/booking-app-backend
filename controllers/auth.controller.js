@@ -1,11 +1,39 @@
-export const login = (req, res) => {
+import jwt from "jsonwebtoken";
+import db from "../models/index.js"; 
+
+
+const userModel = db.User;
+const secret = process.env.JWT_SECRET;
+
+export const login = async (req, res) => {
   const { name, email } = req.body;
 
-  // Exemplo temporário (simulação)
-  if (name === "Joana" && email === "joana@email.com") {
-    return res.status(200).json({ message: "Login realizado com sucesso!" });
+  if (!name || !email) {
+    return res.status(400).json({ message: "Nome e e-mail são obrigatórios." });
   }
 
-  return res.status(401).json({ message: "Credenciais inválidas" });
-};
+  try {
+    let user = await userModel.findOne({ where: { email } });
 
+    if (!user) {
+      user = await userModel.create({ name, email });
+    }
+
+    const token = jwt.sign({ id: user.id, name: user.name, email: user.email }, secret, {
+      expiresIn: "1h",
+    });
+
+    return res.status(200).json({
+      message: "Login realizado com sucesso!",
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    console.error("Erro no login:", error);
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
+};
