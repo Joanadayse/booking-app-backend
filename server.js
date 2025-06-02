@@ -6,9 +6,10 @@ import bookingRoutes from './routes/booking.routes.js';
 import spaceRoutes from './routes/space.routes.js';
 import db from './models/index.js'; 
 
-dotenv.config({
-  path: process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local',
-});
+
+
+dotenv.config({ path: '.env.local' });
+
 
 const app = express();
 const port = process.env.PORT || 5000;

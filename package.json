@@ -4,10 +4,10 @@
   "description": "",
   "main": "server.js",
   "type": "module",
-  "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon server.js",
-    "start": "NODE_ENV=production node server.js"
-  },
+"scripts": {
+  "start": "node server.js",
+  "dev": "nodemon server.js"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
