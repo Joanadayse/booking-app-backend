@@ -57,9 +57,9 @@ const normalizeTurno = (turno) => turno.toLowerCase().normalize("NFD").replace(/
 
 const haConflitoDeTurno = (turnoNovo, turnoExistente) => {
   const turnosEquivalentes = {
-    manha: ["manha", "integral"], // 🔹 "manha" não deve bloquear "tarde"
-    tarde: ["tarde", "integral"], // 🔹 "tarde" não deve bloquear "manha"
-    integral: ["manha", "tarde", "integral"] // 🔹 "integral" bloqueia tudo
+    manha: ["manha", "integral"],
+    tarde: ["tarde", "integral"],
+    integral: ["manha", "tarde", "integral"]
   };
 
   const novo = normalizeTurno(turnoNovo);
@@ -67,8 +67,10 @@ const haConflitoDeTurno = (turnoNovo, turnoExistente) => {
 
   console.log(`🆚 Comparação de conflito no back-end: novo = ${novo}, existente = ${existente}`);
 
-  return turnosEquivalentes[novo]?.includes(existente) && novo !== existente;
+  // 🔄 Agora inclui conflitos com turnos iguais
+  return turnosEquivalentes[novo]?.includes(existente);
 };
+
 
 
 // Buscar todas as reservas para mesma data e espaço
@@ -80,9 +82,17 @@ const reservasExistentes = await Booking.findAll({
 });
 
 // Verificar se algum turno conflita
-const existeConflito = reservasExistentes.some(reserva =>
-  haConflitoDeTurno(turno, reserva.turno)
-);
+// const existeConflito = reservasExistentes.some(reserva => {
+//   if (!reserva.turno) return false; // proteção
+//   return haConflitoDeTurno(turno, reserva.turno);
+// });
+
+const existeConflito = reservasExistentes.some(reserva => {
+  const result = haConflitoDeTurno(turno, reserva.turno);
+  console.log(`⚖️ Comparando turno ${turno} com ${reserva.turno} => Conflito? ${result}`);
+  return result;
+});
+
 
 if (existeConflito) {
   console.log("⚠️ Conflito de reserva detectado.");
@@ -90,6 +100,7 @@ if (existeConflito) {
     error: "Já existe uma reserva para esse espaço, data e turno conflitante."
   });
 }
+
     // Definir horários conforme turno
 const turnos = {
   manha: { start_time: "08:00", end_time: "12:00" },
@@ -106,6 +117,8 @@ if (!turnos[turnoNormalizado]) {
 }
 
 const { start_time, end_time } = turnos[turnoNormalizado];
+
+console.log("⛔ NÃO deveria chegar aqui se há conflito!");
 
 
 
