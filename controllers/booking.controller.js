@@ -400,6 +400,7 @@ export const getFilteredBookings = async (req, res) => {
 // };
 
 export const getStats = async (req, res) => {
+   console.log("✅ req.query:", req.query);
   try {
     const { location } = req.query;
     const whereSpace = location ? { location } : {};
