@@ -74,29 +74,20 @@ const haConflitoDeTurno = (turnoNovo, turnoExistente) => {
 
 
 // Buscar todas as reservas para mesma data e espaço
+// Buscar todas as reservas para mesma data e espaço, sem filtro de turno
 const reservasExistentes = await Booking.findAll({
   where: {
     date: date.trim(),
-    space_id: Number(space_id),
-    turno: turno.trim() // 🔹 Agora verificamos o turno diretamente!
+    space_id: Number(space_id)
   }
 });
 
-if (reservasExistentes.length > 0) {
-  console.log("⚠️ Conflito de reserva detectado!");
-  return res.status(409).json({
-    error: "Já existe uma reserva para esse espaço, data e turno!"
-  });
-}
-
-
-
+// Verificar se existe conflito com qualquer uma delas
 const existeConflito = reservasExistentes.some(reserva => {
   const result = haConflitoDeTurno(turno, reserva.turno);
   console.log(`⚖️ Comparando turno ${turno} com ${reserva.turno} => Conflito? ${result}`);
   return result;
 });
-
 
 if (existeConflito) {
   console.log("⚠️ Conflito de reserva detectado.");
@@ -104,6 +95,7 @@ if (existeConflito) {
     error: "Já existe uma reserva para esse espaço, data e turno conflitante."
   });
 }
+
 
     // Definir horários conforme turno
 const turnos = {
