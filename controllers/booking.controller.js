@@ -203,8 +203,8 @@ export const getBookingsByLocation = async (req, res) => {
 
 export const updateBooking = async (req, res) => {
   console.log("UpdateBooking chamada com id:", req.params.id);
-   console.log("UpdateBooking chamada com id:", req.params.id);
   console.log("Dados recebidos no update:", req.body);
+
   try {
     const { id } = req.params;
     const { title, description, date, turno, user_id, space_id } = req.body;
@@ -215,29 +215,47 @@ export const updateBooking = async (req, res) => {
       return res.status(404).json({ error: "Reserva não encontrada." });
     }
 
-    // Validação básica dos campos obrigatórios
     if (!title || !date || !turno || !user_id || !space_id) {
       return res.status(400).json({ error: "Todos os campos são obrigatórios." });
     }
 
-    // Definir horários conforme turno
+    // Função de normalização
+    const normalizeTurno = (turno) =>
+      turno.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
     const turnos = {
-      manhã: { start_time: "08:00", end_time: "12:00" },
+      manha: { start_time: "08:00", end_time: "12:00" },
       tarde: { start_time: "13:00", end_time: "17:00" },
       integral: { start_time: "08:00", end_time: "17:00" }
     };
 
-    if (!turnos[turno]) {
+    const turnoNormalizado = normalizeTurno(turno);
+
+    if (!turnos[turnoNormalizado]) {
       return res.status(400).json({ error: "Turno inválido!" });
     }
 
-    const { start_time, end_time } = turnos[turno];
+    const { start_time, end_time } = turnos[turnoNormalizado];
 
-    // Atualiza os campos da reserva
+    // 🔒 Verifica se o espaço já está reservado para esse turno e data (ignorando a própria reserva)
+    const conflictingBooking = await Booking.findOne({
+      where: {
+        space_id,
+        date,
+        turno: turnoNormalizado,
+        id: { [Op.ne]: booking.id } // ignora a reserva que estamos atualizando
+      }
+    });
+
+    if (conflictingBooking) {
+      return res.status(400).json({ error: "Esse espaço já está reservado nesse dia e turno." });
+    }
+
+    // Atualiza os campos
     booking.title = title;
     booking.description = description;
     booking.date = date;
-    booking.turno = turno;
+    booking.turno = turnoNormalizado;
     booking.start_time = start_time;
     booking.end_time = end_time;
     booking.user_id = user_id;
@@ -247,10 +265,12 @@ export const updateBooking = async (req, res) => {
 
     res.json(booking);
   } catch (error) {
-    console.error("Erro ao atualizar reserva:", error);
+    console.error("❌ Erro ao atualizar reserva:", error.message);
+    console.error("📄 Stack:", error.stack);
     res.status(500).json({ error: "Erro ao atualizar reserva." });
   }
 };
+
 
 export const getBookingById = async (req, res) => {
   try {
