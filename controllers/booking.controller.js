@@ -356,6 +356,8 @@ export const getFilteredBookings = async (req, res) => {
 
 export const getStats = async (req, res) => {
   try {
+    const { location } = req.query; // ✅ pegando da query string
+
     const totalReservasPorSala = await Booking.findAll({
       attributes: [
         "space_id",
@@ -365,8 +367,6 @@ export const getStats = async (req, res) => {
       include: [{ model: Space, attributes: ["id", "name"] }]
     });
 
-
-
     const totalReservasPorTurno = await Booking.findAll({
       attributes: [
         "turno",
@@ -374,18 +374,25 @@ export const getStats = async (req, res) => {
       ],
       group: ["turno"]
     });
-const totalReservasPorMes = await Booking.findAll({
-  attributes: [
-    [db.sequelize.fn("DATE_TRUNC", "month", db.sequelize.col("Booking.date")), "mes"], 
-    [db.sequelize.fn("COUNT", db.sequelize.col("Booking.id")), "total"] // 🔹 Especificando Booking.id
-  ],
-  group: [db.sequelize.fn("DATE_TRUNC", "month", db.sequelize.col("Booking.date"))], // 🔹 Ajustando GROUP BY corretamente
-  order: [[db.sequelize.fn("DATE_TRUNC", "month", db.sequelize.col("Booking.date")), "ASC"]],
-  include: [{ model: Space, attributes: [], where: { location } }] // 🔹 Filtrando pelo Location
-});
 
+    const whereSpace = location ? { location } : {}; // ✅ só aplica se location foi passado
+
+    const totalReservasPorMes = await Booking.findAll({
+      attributes: [
+        [db.sequelize.fn("DATE_TRUNC", "month", db.sequelize.col("Booking.date")), "mes"],
+        [db.sequelize.fn("COUNT", db.sequelize.col("Booking.id")), "total"]
+      ],
+      group: [db.sequelize.fn("DATE_TRUNC", "month", db.sequelize.col("Booking.date"))],
+      order: [[db.sequelize.fn("DATE_TRUNC", "month", db.sequelize.col("Booking.date")), "ASC"]],
+      include: [{
+        model: Space,
+        attributes: [],
+        where: whereSpace // ✅ aplica filtro por location se existir
+      }]
+    });
 
     res.json({ totalReservasPorSala, totalReservasPorTurno, totalReservasPorMes });
+
   } catch (error) {
     console.error("❌ Erro ao buscar estatísticas:", error);
     res.status(500).json({ error: "Erro ao buscar estatísticas." });
