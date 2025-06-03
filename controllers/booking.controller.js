@@ -356,11 +356,17 @@ export const getFilteredBookings = async (req, res) => {
 
 
 export const getStats = async (req, res) => {
-   console.log("✅ req.query:", req.query);
   try {
-    const { location = null } = req.query;
-    const whereSpace = location ? { location } : {};
+    // 🔍 Depuração para verificar o conteúdo de req.query no Railway
+    console.log("✅ req.query recebido no Railway:", req.query);
 
+    // 🔹 Garante que location está definido corretamente
+    const location = req.query.location ? req.query.location.trim() : undefined;
+
+    // 🔹 Se location não existir, `whereSpace` será `undefined`, evitando erros no Sequelize
+    const whereSpace = location ? { location } : undefined;
+
+    // 📊 Buscar total de reservas por sala
     const totalReservasPorSala = await Booking.findAll({
       attributes: [
         "space_id",
@@ -370,6 +376,7 @@ export const getStats = async (req, res) => {
       include: [{ model: Space, attributes: ["id", "name"] }]
     });
 
+    // 📊 Buscar total de reservas por turno
     const totalReservasPorTurno = await Booking.findAll({
       attributes: [
         "turno",
@@ -378,6 +385,7 @@ export const getStats = async (req, res) => {
       group: ["turno"]
     });
 
+    // 📊 Buscar total de reservas por mês
     const totalReservasPorMes = await Booking.findAll({
       attributes: [
         [db.sequelize.fn("DATE_TRUNC", "month", db.sequelize.col("Booking.date")), "mes"],
@@ -388,13 +396,16 @@ export const getStats = async (req, res) => {
       include: [{
         model: Space,
         attributes: [],
-        where: whereSpace
+        where: whereSpace // 🔹 Garantimos que `whereSpace` está correto
       }]
     });
 
+    // 🚀 Retornando os dados corretamente
     res.json({ totalReservasPorSala, totalReservasPorTurno, totalReservasPorMes });
+
   } catch (error) {
-    console.error("❌ Erro ao buscar estatísticas:", error);
+    console.error("❌ Erro ao buscar estatísticas:", error.message);
+    console.error("📄 Stack do erro:", error.stack);
     res.status(500).json({ error: "Erro ao buscar estatísticas." });
   }
 };
