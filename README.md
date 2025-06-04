@@ -1,55 +1,27 @@
 # 📦 Booking App - Backend (Node.js + Express + PostgreSQL)
 
-API para gerenciamento de reservas de salas compartilhadas.
+🔗 **Deploy do Backend:** [Booking App API - Railway](booking-app-backend-production-a215.up.railway.app)  
+🔗 **Documentação e Testes no Postman:** [API no Postman](https://documenter.getpostman.com/view/24823163/2sB2x2HtHy)
+🔗 **Repositório Front end:** [Front-end](https://github.com/Joanadayse/booking-app-frontend)
 
 ---
 
-## 🚀 Tecnologias
 
-- Node.js
-- Express.js
-- PostgreSQL
-- Sequelize (ou Pool se for raw SQL)
-- JWT (para autenticação futura)
+## 🚀 Funcionalidades  
+✅ **Autenticação de usuários** via JWT  
+✅ **Criação e gerenciamento de reservas**  
+✅ **Consulta de reservas filtradas por período e localização**  
+✅ **Exclusão de espaços**  
+✅ **Estatísticas de reservas por mês e turno**  
+✅ **Integração com PostgreSQL via Sequelize**  
 
 ---
 
-🌍 Deploy
-🔹 Backend rodando em:
-```
-https://booking-app-backend-production-a215.up.railway.app
-```
+## 🛠️ Tecnologias Utilizadas  
+- **Node.js** – Backend rápido e escalável  
+- **Express.js** – Framework leve para APIs REST  
+- **PostgreSQL** – Banco de dados relacional  
+- **Sequelize** – ORM para PostgreSQL  
+- **JWT** – Autenticação segura  
 
-
-## ⚙️ Instalação
-
-1. Clone o projeto:
-```
-git clone https://github.com/seu-usuario/booking-app-backend.git
-```
-
-Instale as dependências:
-```
-npm install
-```
-
-Crie um arquivo .env com base no .env.example:
-```
-cp .env.example .env
-```
-Configure o PostgreSQL localmente com os dados do .env.
-
-Execute o projeto:
-```
-npm start
-```
-
-✅ Testando
-Você pode testar as rotas com:
--Postman
--Insomnia
-
-Rota de teste:
-```
-GET http://localhost:5000/
-```
+---
