@@ -1,8 +1,10 @@
 # 📦 Booking App - Backend (Node.js + Express + PostgreSQL)
 
-🔗 **Deploy do Backend:** [Booking App API - Railway](booking-app-backend-production-a215.up.railway.app)  
-🔗 **Documentação e Testes no Postman:** [API no Postman](https://documenter.getpostman.com/view/24823163/2sB2x2HtHy)
-🔗 **Repositório Front end:** [Front-end](https://github.com/Joanadayse/booking-app-frontend)
+---
+- **Deploy do Backend:** [Booking App API - Railway](booking-app-backend-production-a215.up.railway.app)  
+- **Documentação e Testes no Postman:** [API no Postman](https://documenter.getpostman.com/view/24823163/2sB2x2HtHy)
+- **Repositório Front end:** [Front-end](https://github.com/Joanadayse/booking-app-frontend)
+
 
 ---
 
