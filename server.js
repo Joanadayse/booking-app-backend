@@ -8,7 +8,7 @@ import db from './models/index.js';
 
 
 
-dotenv.config({ path: '.env.local' });
+dotenv.config();
 
 
 const app = express();

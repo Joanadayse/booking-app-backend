@@ -1,13 +1,13 @@
 {
   "name": "booking-app-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "---\r - **Deploy do Backend:** [Booking App API - Railway](booking-app-backend-production-a215.up.railway.app)  \r - **Documentação e Testes no Postman:** [API no Postman](https://documenter.getpostman.com/view/24823163/2sB2x2HtHy)\r - **Repositório Front end:** [Front-end](https://github.com/Joanadayse/booking-app-frontend)",
   "main": "node server.js",
   "type": "module",
-"scripts": {
-  "start": "node server.js",
-  "dev": "nodemon server.js"
-},
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -25,5 +25,13 @@
     "nodemon": "^3.1.10",
     "sequelize-cli": "^6.6.3",
     "ts-node": "^10.9.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Joanadayse/booking-app-backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Joanadayse/booking-app-backend/issues"
+  },
+  "homepage": "https://github.com/Joanadayse/booking-app-backend#readme"
 }
